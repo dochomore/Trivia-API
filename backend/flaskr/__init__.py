@@ -1,4 +1,9 @@
+from fnmatch import fnmatch
+import json
 import os
+from pickle import GET
+from tkinter import N
+from wsgiref.util import request_uri
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
@@ -30,6 +35,13 @@ def create_app(test_config=None):
                              'GET,PATCH,POST,DELETE,OPTIONS')
         return response
 
+    def categories():
+        categories = Category.query.all()
+        data = {}
+        for category in categories:
+            data[f'{category.id}'] = category.type
+        return data
+
     """
     @TODO:
     Create an endpoint to handle GET requests
@@ -37,10 +49,7 @@ def create_app(test_config=None):
     """
     @app.route('/categories', methods=['GET'])
     def get_catagories():
-        categories = Category.query.all()
-        data = {}
-        for category in categories:
-            data[f'{category.id}'] = category.type;
+        data = categories()
         return jsonify({'categories': data})
 
     """
@@ -55,6 +64,29 @@ def create_app(test_config=None):
     ten questions per page and pagination at the bottom of the screen for three pages.
     Clicking on the page numbers should update the questions.
     """
+    @app.route('/questions', methods=['GET'])
+    def get_questions():
+        page = request.args.get('page', 1, type=int)
+        start = (page - 1) * QUESTIONS_PER_PAGE
+        end = start + QUESTIONS_PER_PAGE
+        try:
+            data = {}
+            questions = Question.query.all()[start:end]
+            if (questions is None):
+                raise Exception()
+            qts = []
+            for question in questions:
+                q = {'id': question.id, 'question': question.question, 'answer': question.answer,
+                     'difficulty': question.difficulty, 'category': question.category}
+                qts.append(q)
+            data['questions'] = qts
+            data['categories'] = categories()
+            data['totalQuestions'] = len(questions)
+            
+        except:
+            pass
+        finally:
+            return jsonify(data)
 
     """
     @TODO:
