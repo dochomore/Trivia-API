@@ -1,4 +1,6 @@
+from asyncio import constants
 import json
+from operator import index
 import os
 from pickle import GET
 from tkinter import N
@@ -128,6 +130,30 @@ def create_app(test_config=None):
     only question that include that string within their question.
     Try using the word "title" to start.
     """
+    @app.route('/questions/search', methods=['POST'])
+    def search_question():
+        search_term = request.args.get('searchTerm', '', type=str)
+        term = "%{}%".format(search_term)
+        data = {}
+        qts = []
+        try:
+            questions = Question.query.filter(Question.question.ilike(term)).all();
+            for index, q in enumerate(questions):
+                obje = {}
+                obje['id'] = q.id
+                obje['question'] = q.question
+                obje['answer'] = q.answer
+                obje['category'] = q.category
+                qts.append(obje)
+                
+            data['questions'] = qts
+            data['totalQuestions'] = len(questions)
+            
+        except:
+            db.session.rollback()
+        finally:
+            db.session.close()
+        return jsonify(data)
 
     """
     @TODO:
