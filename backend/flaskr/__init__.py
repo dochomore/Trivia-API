@@ -13,15 +13,14 @@ from .models import setup_db, Question, Category
 QUESTIONS_PER_PAGE = 10
 database = None
 
+
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__)
     db = setup_db(app)
 
-   
     cors = CORS(app=app, resources={r"/*": {'origins': '*'}})
 
-    
     @app.after_request
     def after_request(response):
         response.headers.add('Access-Control-Allow-Headers',
@@ -36,7 +35,6 @@ def create_app(test_config=None):
         for category in categories:
             data[f'{category.id}'] = category.type
         return data
-
 
     @app.route('/categories', methods=['GET'])
     def get_catagories():
@@ -73,13 +71,12 @@ def create_app(test_config=None):
             data['questions'] = qts
             data['categories'] = categories()
             data['totalQuestions'] = len(questions)
-            
+
         except:
             pass
         finally:
             return jsonify(data)
 
-   
     @app.route('/questions/<int:question_id>', methods=['POST', 'DELETE'])
     def delete_question(question_id):
         data = None
@@ -91,8 +88,7 @@ def create_app(test_config=None):
             db.session.rollback()
         finally:
             db.session.close()
-        return jsonify({'success': data});
-            
+        return jsonify({'success': data})
 
     """
     @TODO:
@@ -104,6 +100,23 @@ def create_app(test_config=None):
     the form will clear and the question will appear at the end of the last page
     of the questions list in the "List" tab.
     """
+    @app.route('/questions', methods=['POST'])
+    def create_question():
+        question = request.args.get('question', '', type=str)
+        answer = request.args.get('answer', '', type=str)
+        difficulty = request.args.get('difficulty', 0, type=int)
+        category = request.args.get('category', 0, type=int)
+
+        try:
+            q = Question(question=question, answer=answer,
+                         difficulty=difficulty, category=category)
+            db.session.add(q)
+            db.session.commit()
+        except:
+            db.session.rollback()
+        finally:
+            db.session.close()
+        return jsonify({'success': True})
 
     """
     @TODO:
