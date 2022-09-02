@@ -123,16 +123,16 @@ def create_app(test_config=None):
             db.session.rollback()
         finally:
             db.session.close()
+        print(data)
         return jsonify(data)
 
-    @app.route('/questions/<categories>', methods=['GET'])
-    def question_categories(categories):
-        term = "%{}%".format(categories)
+    @app.route('/categories/<int:id>/questions', methods=['GET'])
+    def question_categories(id):
         data = {}
         qts = []
         try:
             questions = Question.query.filter(
-                Question.category == categories).all()
+                Question.category == id).all()
             for index, q in enumerate(questions):
                 obje = {}
                 obje['id'] = q.id
