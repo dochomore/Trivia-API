@@ -105,7 +105,8 @@ def create_app(test_config=None):
         data = {}
         qts = []
         try:
-            questions = Question.query.filter(Question.question.ilike(term)).all();
+            questions = Question.query.filter(
+                Question.question.ilike(term)).all()
             for index, q in enumerate(questions):
                 obje = {}
                 obje['id'] = q.id
@@ -113,10 +114,10 @@ def create_app(test_config=None):
                 obje['answer'] = q.answer
                 obje['category'] = q.category
                 qts.append(obje)
-                
+
             data['questions'] = qts
             data['totalQuestions'] = len(questions)
-            
+
         except:
             db.session.rollback()
         finally:
@@ -129,7 +130,8 @@ def create_app(test_config=None):
         data = {}
         qts = []
         try:
-            questions = Question.query.filter(Question.category == categories).all();
+            questions = Question.query.filter(
+                Question.category == categories).all()
             for index, q in enumerate(questions):
                 obje = {}
                 obje['id'] = q.id
@@ -137,10 +139,10 @@ def create_app(test_config=None):
                 obje['answer'] = q.answer
                 obje['category'] = q.category
                 qts.append(obje)
-                
+
             data['questions'] = qts
             data['totalQuestions'] = len(questions)
-            
+
         except:
             db.session.rollback()
         finally:
@@ -158,11 +160,20 @@ def create_app(test_config=None):
     one question at a time is displayed, the user is allowed to answer
     and shown whether they were correct or not.
     """
+    # @app.route('/quizzes', methods=['POST'])
+    # def quizzes():
+    #     questions = request.args.get('questions', [], type=list)
+    #     category = request.args.get('category', '', type=str)
+    #     try:
+    #         quesitons
 
     """
     @TODO:
     Create error handlers for all expected errors
     including 404 and 422.
     """
+    @app.errorhandler(404)
+    def not_found(erorr):
+        return jsonify({'Success': False, 'error': 404, "message": "not found"}), 404
 
     return app
