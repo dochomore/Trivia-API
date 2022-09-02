@@ -173,6 +173,6 @@ def create_app(test_config=None):
     
     @app.errorhandler(422)
     def unprocessable(erorr):
-        return jsonify({'Success': False, 'error': 404, "message": "unprocesable"}), 422
+        return jsonify({'Success': False, 'error': 422, "message": "unprocesable"}), 422
 
     return app
