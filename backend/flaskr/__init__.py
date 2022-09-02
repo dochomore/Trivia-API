@@ -167,11 +167,6 @@ def create_app(test_config=None):
     #     try:
     #         quesitons
 
-    """
-    @TODO:
-    Create error handlers for all expected errors
-    including 404 and 422.
-    """
     @app.errorhandler(404)
     def not_found(erorr):
         return jsonify({'Success': False, 'error': 404, "message": "not found"}), 404
