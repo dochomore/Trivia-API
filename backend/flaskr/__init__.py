@@ -1,3 +1,4 @@
+from array import array
 from asyncio import constants
 import json
 from operator import index
@@ -160,17 +161,35 @@ def create_app(test_config=None):
     one question at a time is displayed, the user is allowed to answer
     and shown whether they were correct or not.
     """
-    # @app.route('/quizzes', methods=['POST'])
-    # def quizzes():
-    #     questions = request.args.get('questions', [], type=list)
-    #     category = request.args.get('category', '', type=str)
-    #     try:
-    #         quesitons
+    @app.route('/quizzes', methods=['POST'])
+    def quizzes():
+        prev_questions = request.json['questions']
+        category = request.json['category']
+        data = {}
+
+        try:
+
+            questions = Question.query.filter(
+                Question.category == category).filter(Question.id.not_in(prev_questions)).all()
+            if questions is not None:
+                question = {}
+                response = questions[1]
+                question['id'] = response.id
+                question['question'] = response.question
+                question['answer'] = response.answer
+                question['difficulty'] = response.difficulty
+                question['category'] = response.category
+                
+                data['question'] = question
+        except:
+            pass
+
+        return jsonify(data)
 
     @app.errorhandler(404)
     def not_found(erorr):
         return jsonify({'Success': False, 'error': 404, "message": "not found"}), 404
-    
+
     @app.errorhandler(422)
     def unprocessable(erorr):
         return jsonify({'Success': False, 'error': 422, "message": "unprocesable"}), 422
