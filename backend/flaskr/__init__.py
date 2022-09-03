@@ -55,10 +55,13 @@ def create_app(test_config=None):
             if (questions is None):
                 raise Exception()
             qts = []
-            for question in questions:
+             
+            for index, question in enumerate(questions):
                 q = {'id': question.id, 'question': question.question, 'answer': question.answer,
                      'difficulty': question.difficulty, 'category': question.category}
                 qts.append(q)
+                if index == 0:
+                    data['currentCategory'] = categories()['1']
             data['questions'] = qts
             data['categories'] = categories()
             data['totalQuestions'] = len(questions)
@@ -83,11 +86,11 @@ def create_app(test_config=None):
 
     @app.route('/questions', methods=['POST'])
     def create_question():
-        question = request.args.get('question', '', type=str)
-        answer = request.args.get('answer', '', type=str)
-        difficulty = request.args.get('difficulty', 0, type=int)
-        category = request.args.get('category', 0, type=int)
-
+        question = request.json['question']
+        answer = request.json['answer']
+        difficulty = request.json['difficulty']
+        category = request.json['category']
+        
         try:
             q = Question(question=question, answer=answer,
                          difficulty=difficulty, category=category)
@@ -101,13 +104,15 @@ def create_app(test_config=None):
 
     @app.route('/questions/search', methods=['POST'])
     def search_question():
-        search_term = request.args.get('searchTerm', '', type=str)
+        search_term = request.json['searchTerm']
         term = "%{}%".format(search_term)
         data = {}
         qts = []
+
         try:
             questions = Question.query.filter(
                 Question.question.ilike(term)).all()
+           
             for index, q in enumerate(questions):
                 obje = {}
                 obje['id'] = q.id
@@ -116,6 +121,9 @@ def create_app(test_config=None):
                 obje['category'] = q.category
                 qts.append(obje)
 
+                if index == 0:
+                    data['currentCategory'] = categories()['1']
+
             data['questions'] = qts
             data['totalQuestions'] = len(questions)
 
@@ -123,7 +131,6 @@ def create_app(test_config=None):
             db.session.rollback()
         finally:
             db.session.close()
-        print(data)
         return jsonify(data)
 
     @app.route('/categories/<int:id>/questions', methods=['GET'])
@@ -141,6 +148,9 @@ def create_app(test_config=None):
                 obje['category'] = q.category
                 qts.append(obje)
 
+                if index == 0:
+                    data['currentCategory'] = categories()['1']
+
             data['questions'] = qts
             data['totalQuestions'] = len(questions)
 
@@ -152,8 +162,8 @@ def create_app(test_config=None):
 
     @app.route('/quizzes', methods=['POST'])
     def quizzes():
-        prev_questions = request.json['questions']
-        category = request.json['category']
+        prev_questions = request.json['previous_questions']
+        category = request.json['quiz_category']
         data = {}
 
         try:
