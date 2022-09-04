@@ -5,6 +5,7 @@ from operator import index
 import os
 from pickle import GET
 from tkinter import N
+from tkinter.tix import Tree
 from wsgiref.util import request_uri
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
@@ -73,16 +74,24 @@ def create_app(test_config=None):
 
     @app.route('/questions/<int:question_id>', methods=['POST', 'DELETE'])
     def delete_question(question_id):
-        data = None
+        success = True
+        id_of_question = None
         try:
             question = Question.query.get(question_id)
+            if question:
+                success = True
+                id_of_question = question.id
+            else:
+                id_of_question  = question_id
+                success = False
+                raise Exception()
             db.session.delete(question)
             db.session.commit()
         except:
             db.session.rollback()
         finally:
             db.session.close()
-        return jsonify({'success': data})
+        return jsonify({'success': success, 'id': id_of_question})
 
     @app.route('/questions', methods=['POST'])
     def create_question():
