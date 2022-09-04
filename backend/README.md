@@ -90,6 +90,13 @@ You will need to provide detailed documentation of your API endpoints including 
 }
 ```
 
+`GET /questions?page=1`
+
+- Fetches a paginated list of questions in which the page query param indicated the page number of question.
+
+- Request Arguments: page number as query param
+- Response: a paginated list of questions
+
 ## Testing
 
 Write at least one test for the success and at least one error behavior of each endpoint using the unittest library.
